@@ -19,12 +19,22 @@ class LinkExplorer:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.visited_urls = set()
 
-        print("REGEX link URL filter .........: ", Fore.CYAN, self.link_filter_pattern, Style.RESET_ALL)
-        print("REGEX media extension pattern .: ", Fore.CYAN, self.ext_pattern, Style.RESET_ALL)
-        print("REGEX media URL filter ........: ", Fore.CYAN, self.media_filter_pattern, Style.RESET_ALL)
+        print("REGEX link URL filter .........: ",
+              Fore.CYAN if self.link_filter_pattern is not '' else Fore.RED,
+              self.link_filter_pattern if self.link_filter_pattern is not '' else 'None',
+              Style.RESET_ALL)
+        print("REGEX media extension pattern .: ",
+              Fore.CYAN if self.ext_pattern is not '' else Fore.RED,
+              self.ext_pattern if self.ext_pattern is not '' else 'None',
+              Style.RESET_ALL)
+        print("REGEX media URL filter ........: ",
+              Fore.CYAN if self.media_filter_pattern is not '' else Fore.RED,
+              self.media_filter_pattern if self.media_filter_pattern is not '' else 'None',
+              Style.RESET_ALL)
         print("Relative URL prefix type ......: ", Fore.CYAN, str(self.prefix_type), Style.RESET_ALL)
         print("Link search depth .............: ", Fore.CYAN, str(self.depth), Style.RESET_ALL)
         print("Connection timeout ............: ", Fore.CYAN, str(self.timeout) + "s", Style.RESET_ALL)
+
 
     def grabLinks(self, url):
         '''
@@ -32,7 +42,7 @@ class LinkExplorer:
         @param url: URL of the page
         @return: List of all the media links
         '''
-        print("Root URL ......................: ", Fore.BLUE, url, Style.RESET_ALL)
+        print("Root URL ......................: ", Fore.LIGHTBLUE_EX, url, Style.RESET_ALL)
         media_links = set()
         count = 0
 
@@ -68,24 +78,30 @@ class LinkExplorer:
         @param url: URL of page
         @return: List of all other std links found in page
         '''
-        request = self.http.request("GET", url, timeout=self.timeout)
-        html = request.data  # .decode("utf-8")
-        count = 0
         page_links = []
+        try:
+            request = self.http.request("GET", url, timeout=self.timeout)
+        except urllib3.exceptions.MaxRetryError:
+            print("|-", Fore.MAGENTA, "(!) Error:", Fore.RESET, "Max GET retries reached on " + url)
+        except urllib3.exceptions.LocationParseError:
+            print("|-", Fore.MAGENTA, "(!) Error:", Fore.RESET, "Failed to parse \"" + url + "\"")
+        else:
+            html = request.data  # .decode("utf-8")
+            count = 0
 
-        for tag in bs4.BeautifulSoup(html, "html.parser").find_all("a", href=True):
-            link = tag.get('href')
-            # print("ful URL A: "+ link)
-            link = self.__createAbsoluteURL(url, link)
-            # print("ful URL B: "+ link)
-            if re.search(self.ext_pattern, link) is not None:
-                if re.search(re.compile(self.media_filter_pattern), link) is not None:
-                    if self.__addToSet(media_links, link):
-                        count += 1
-            else:
-                page_links.append(link)
+            for tag in bs4.BeautifulSoup(html, "html.parser").find_all("a", href=True):
+                link = tag.get('href')
+                # print("ful URL A: "+ link)
+                link = self.__createAbsoluteURL(url, link)
+                # print("ful URL B: "+ link)
+                if re.search(self.ext_pattern, link) is not None:
+                    if re.search(re.compile(self.media_filter_pattern), link) is not None:
+                        if self.__addToSet(media_links, link):
+                            count += 1
+                else:
+                    page_links.append(link)
 
-        print("Found " + str(count) + " new media targets in " + url)
+            print("|- Found " + str(count) + " new media targets in " + url)
         return page_links
 
     def __buildExtPattern(self, ext_list):

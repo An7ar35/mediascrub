@@ -3,7 +3,7 @@ import sys
 
 from colorama import Fore, Style
 
-import explorer
+from explorer import LinkExplorer
 from flags import PrefixType
 from writer import TextWriter
 
@@ -28,14 +28,17 @@ def main(argv):
                         help='URL case-sensitive filter (default: %(default)s)')
 
     args = parser.parse_args(argv)
-    print("Print media links to file .....: ", Fore.GREEN if args.list else Fore.RED, list_file_name if args.list else 'None', Style.RESET_ALL)
+    print("Print media links to file .....: ",
+          Fore.GREEN if args.list else Fore.RED,
+          list_file_name if args.list else 'No',
+          Style.RESET_ALL)
     # print(args)
-    scrubber = explorer.LinkExplorer(args.ext_filter,
-                                     args.url_filter,
-                                     args.media_filter,
-                                     PrefixType.translate(args.prefix),
-                                     args.depth,
-                                     args.timeout)
+    scrubber = LinkExplorer(args.ext_filter,
+                            args.url_filter,
+                            args.media_filter,
+                            PrefixType.translate(args.prefix),
+                            args.depth,
+                            args.timeout)
     urls = scrubber.grabLinks(args.URL)
 
     if args.list is True:
