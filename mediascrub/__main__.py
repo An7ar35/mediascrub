@@ -1,13 +1,10 @@
+#!/usr/bin/env python.
+
 import argparse
 import subprocess
 import sys
 
 from colorama import Fore, Style
-
-import downloader
-from explorer import LinkExplorer
-from flags import PrefixType
-from writer import TextWriter
 
 
 def main(argv):
@@ -37,16 +34,16 @@ def main(argv):
           list_file_name if args.list else 'No',
           Style.RESET_ALL)
 
-    scrubber = LinkExplorer(args.ext_filter,
-                            args.url_filter,
-                            args.media_filter,
-                            PrefixType.translate(args.prefix),
-                            args.depth,
-                            args.timeout)
+    scrubber = crawler.LinkExplorer(args.ext_filter,
+                                    args.url_filter,
+                                    args.media_filter,
+                                    flags.PrefixType.translate(args.prefix),
+                                    args.depth,
+                                    args.timeout)
     urls = scrubber.grabLinks(args.URL)
 
     if args.list is True or args.no_dwl is True:
-        writer = TextWriter()
+        writer = io.TextWriter()
         writer.open(list_file_name)
         for url in urls:
             writer.writeLine(url)
