@@ -1,9 +1,29 @@
 import re
+from enum import Enum, auto
 
 import bs4
 import urllib3
 from colorama import Fore, Style
 
+
+class PrefixType(Enum):
+    DOMAIN = auto()
+    URL = auto()
+
+    def describe(self):
+        return self.name, self.value
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def translate(string):
+        if string is 'domain':
+            return PrefixType.DOMAIN
+        elif string is 'url':
+            return PrefixType.URL
+        else:
+            raise ValueError('Prefix type \'' + string + '\' is not valid.')
 
 class LinkExplorer:
     def __init__(self, ext_list, link_filters, media_filters, prefix_types, depth, timeout):
@@ -142,7 +162,7 @@ class LinkExplorer:
         @param relative_link: Relative link from origin page
         @return: Absolute URL
         '''
-        if self.prefix_type == flags.PrefixType.DOMAIN:
+        if self.prefix_type == PrefixType.DOMAIN:
             return self.__addUrlPrefix(self.__getDomain(base_url), relative_link)
         else:
             return self.__addUrlPrefix(base_url, relative_link)
@@ -198,3 +218,4 @@ class LinkExplorer:
         length = len(set)
         set.add(x)
         return len(set) != length
+

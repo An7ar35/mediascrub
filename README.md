@@ -6,7 +6,13 @@ CLI web page media scrubber/downloader with some url level filtering options.
 
 ## Installation
 
-//TODO
+From the repo directory:
+
+`sudo pip install -e .`
+
+## Removal
+
+`sudo pip uninstall mediascrub`
 
 ## Usage
 

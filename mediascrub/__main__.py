@@ -1,4 +1,4 @@
-#!/usr/bin/env python.
+#!/usr/bin/env python
 
 import argparse
 import subprocess
@@ -6,8 +6,15 @@ import sys
 
 from colorama import Fore, Style
 
+from mediascrub.crawler import LinkExplorer, PrefixType
+from mediascrub.io import TextWriter
 
-def main(argv):
+
+def wget(url, timeout):
+    return ['wget', '--no-verbose', '--no-clobber', '--timeout=' + str(timeout), url]
+
+
+def main(argv=sys.argv[1:]):
     list_file_name = 'media-list.txt'
 
     parser = argparse.ArgumentParser(prog='mediascrub', description='Download files from a website')
@@ -34,24 +41,24 @@ def main(argv):
           list_file_name if args.list else 'No',
           Style.RESET_ALL)
 
-    scrubber = crawler.LinkExplorer(args.ext_filter,
-                                    args.url_filter,
-                                    args.media_filter,
-                                    flags.PrefixType.translate(args.prefix),
-                                    args.depth,
-                                    args.timeout)
+    scrubber = LinkExplorer(args.ext_filter,
+                            args.url_filter,
+                            args.media_filter,
+                            PrefixType.translate(args.prefix),
+                            args.depth,
+                            args.timeout)
     urls = scrubber.grabLinks(args.URL)
 
     if args.list is True or args.no_dwl is True:
-        writer = io.TextWriter()
+        writer = TextWriter()
         writer.open(list_file_name)
         for url in urls:
             writer.writeLine(url)
 
     if args.no_dwl is False:
         for url in urls:
-            subprocess.call(downloader.wget(url, args.timeout))
+            subprocess.call(wget(url, args.timeout))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(sys.argv[1:])
