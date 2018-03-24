@@ -11,7 +11,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='mediascrub',
-    version='0.0.1a',
+    version='0.0.2a',
     author='An7ar35',
     author_email='',
     description='Web page media scrubber',

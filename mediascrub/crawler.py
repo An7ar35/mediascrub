@@ -109,9 +109,17 @@ class LinkExplorer:
 
             for tag in bs4.BeautifulSoup(html, "html.parser").find_all("a", href=True):
                 link = tag.get('href')
-                # print("ful URL A: "+ link)
                 link = self.__createAbsoluteURL(url, link)
-                # print("ful URL B: "+ link)
+                if re.search(self.ext_pattern, link) is not None:
+                    if re.search(re.compile(self.media_filter_pattern), link) is not None:
+                        if self.__addToSet(media_links, link):
+                            count += 1
+                else:
+                    page_links.append(link)
+
+            for tag in bs4.BeautifulSoup(html, "html.parser").findAll(src=True):
+                link = tag.get('src')
+                link = self.__createAbsoluteURL(url, link)
                 if re.search(self.ext_pattern, link) is not None:
                     if re.search(re.compile(self.media_filter_pattern), link) is not None:
                         if self.__addToSet(media_links, link):
