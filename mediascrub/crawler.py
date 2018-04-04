@@ -18,9 +18,10 @@ class PrefixType(Enum):
 
     @staticmethod
     def translate(string):
-        if string is 'domain':
+        print(string)
+        if string == 'domain':
             return PrefixType.DOMAIN
-        elif string is 'url':
+        elif string == 'url':
             return PrefixType.URL
         else:
             raise ValueError('Prefix type \'' + string + '\' is not valid.')
@@ -186,15 +187,30 @@ class LinkExplorer:
         # Group 1: string starting with 'http'
         # Group 2: string starting with '//'
         capture = re.search(re.compile('(http.*)|(//.*)'), link)
+        if not url.endswith('/'):
+            url = self.__trimUrl(url)
         if capture is None:
-            if url.endswith('/'):
+            if bool(url.endswith('/')) ^ bool(link.startswith('/')):
+                return url + link
+            if url.endswith('/') and link.startswith('/'):
                 return url[:-1] + link
             else:
-                return url + link
-        elif capture.group(2) is not None:  # missing "http:" needs to be added before "//"
-            return "http:" + link
+                return url + '/' + link
         else:
-            return link
+            if capture.group(2) is not None:
+                link = "http:" + link  # missing "http:" needs to be added before "//"
+        return link
+
+    def __trimUrl(self, url):
+        '''
+        Trims a url with a file at the end so that just the path remains
+        @param url: URL
+        @return: Trimmed URL if a '.something' is at the end.
+        '''
+        capture = re.search(re.compile('^(.*?)([^/]+.[.]+[\w]+$)'), url)
+        if capture is not None:
+            return capture.group(1)
+        return url
 
     def __getDomain(self, url):
         '''
